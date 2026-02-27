@@ -1,2 +1,7 @@
-node_modules
-articles
+node_modules/
+venv/
+__pycache__/
+media_db.json
+output/
+log.txt
+.DS_Store
