@@ -83,5 +83,37 @@ AI must:
 - Avoid ad-hoc unstable changes
 
 ---
+## 7. System Boundaries
 
-Last Updated: 2026-02-28
+This system is:
+
+- An infrastructure project, not a media publication.
+- A feed aggregation layer, not an analytics platform (yet).
+- An automated pipeline, not a manual editorial tool.
+
+The system does NOT:
+
+- Rewrite article content.
+- Inject opinion.
+- Store full article bodies.
+- Perform AI summarization inside the core pipeline.
+-
+-## 8. Scalability Assumptions
+
+- Designed initially for 5–20 RSS sources.
+- Must tolerate missing or malformed metadata.
+- Must remain compatible with public GitHub infrastructure constraints.
+- Time complexity must remain linear relative to source count.
+-
+## 9. System Identity
+
+PCOS is an evolving intelligence infrastructure project.
+
+Phase 1: Feed infrastructure  
+Phase 2: Structured metadata layer  
+Phase 3: Classification and tagging system  
+Phase 4: Signal extraction and analysis  
+Phase 5: Strategic research automation  
+
+The current repository represents Phase 1 completion.
+- - Last Updated: 2026-02-28
