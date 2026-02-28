@@ -1,6 +1,7 @@
 import feedparser
 import os
 import json
+import re
 from difflib import SequenceMatcher
 from xml.etree.ElementTree import Element, SubElement, ElementTree
 from datetime import datetime
@@ -40,6 +41,23 @@ def is_duplicate(title, existing_titles):
             return True
     return False
 
+def clean_text(text):
+    if not text:
+        return ""
+
+   
+    # 去常见噪音提示
+    noise_keywords = [
+        "Subscribe to read",
+        "Client Challenge",
+        "Please enable JavaScript",
+        "Accessibility help"
+    ]
+
+    for word in noise_keywords:
+        text = text.replace(word, "")
+
+    return text.strip()
 
 def fetch_rss(source_name, url):
     feed = feedparser.parse(url)
@@ -84,7 +102,8 @@ def generate_rss(entries):
         SubElement(item, "title").text = entry["title"]
         SubElement(item, "pubDate").text = entry["published"] or datetime.utcnow().isoformat()
         SubElement(item, "source").text = entry["source"]
-
+        SubElement(item, "link").text = entry.get("link", "")
+        
         description = SubElement(item, "description")
         description.text = entry["content"]
 
@@ -114,11 +133,14 @@ def run_pipeline():
 
             if not is_duplicate(title, existing_titles):
                 content = entry["summary"]
-
+                
+                content = clean_text(content)
+                
                 processed_entry = {
                     "source": entry["source"],
                     "title": title,
                     "published": entry["published"],
+                    "link": entry.get("link", ""),                    
                     "content": content
                 }
 
