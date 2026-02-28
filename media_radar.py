@@ -17,7 +17,7 @@ RSS_FEEDS = {
 
 MAX_ITEMS_PER_SOURCE = 10
 SIMILARITY_THRESHOLD = 0.8
-OUTPUT_DIR = "output"
+OUTPUT_DIR = "rss"
 DB_FILE = "media_db.json"
 
 
@@ -84,7 +84,8 @@ def generate_rss(entries):
         SubElement(item, "title").text = entry["title"]
         SubElement(item, "pubDate").text = entry["published"] or datetime.utcnow().isoformat()
         SubElement(item, "source").text = entry["source"]
-
+        SubElement(item, "link").text = entry.get("link", "")
+        
         description = SubElement(item, "description")
         description.text = entry["content"]
 
@@ -119,7 +120,7 @@ def run_pipeline():
                     "source": entry["source"],
                     "title": title,
                     "published": entry["published"],
-                    "content": content
+                    "link": entry.get("link", ""),                    "content": content
                 }
 
                 all_entries.append(processed_entry)

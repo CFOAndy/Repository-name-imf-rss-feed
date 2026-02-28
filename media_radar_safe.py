@@ -18,7 +18,7 @@ RSS_FEEDS = {
 
 MAX_ITEMS_PER_SOURCE = 10
 SIMILARITY_THRESHOLD = 0.8
-OUTPUT_DIR = "output"
+OUTPUT_DIR = "rss"
 DB_FILE = "media_db.json"
 
 
