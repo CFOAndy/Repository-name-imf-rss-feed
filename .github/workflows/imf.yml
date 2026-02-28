@@ -1,11 +1,8 @@
-name: Update IMF RSS
-
-permissions:
-  contents: write
+name: Update Media Radar Feed
 
 on:
   schedule:
-    - cron: '0 3 * * *'   # 每天 UTC 03:00 = 北京时间 11:00
+    - cron: "*/30 * * * *"   # 每30分钟执行一次
   workflow_dispatch:
 
 jobs:
@@ -16,24 +13,23 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          node-version: '20'
+          python-version: "3.11"
 
       - name: Install dependencies
-        run: npm install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
-      - name: Install Playwright browsers
-        run: npx playwright install --with-deps
+      - name: Run RSS generator
+        run: python media_radar.py
 
-      - name: Run scraper
-        run: node imf.js
-
-      - name: Commit & Push if changed
+      - name: Commit and push if changed
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "actions@github.com"
-          git add imf.xml
-          git commit -m "auto update rss" || echo "No changes"
+          git add rss/media.xml media_db.json
+          git commit -m "Auto update RSS" || echo "No changes"
           git push
