@@ -1,6 +1,7 @@
 import feedparser
 import os
 import json
+import re
 from difflib import SequenceMatcher
 from xml.etree.ElementTree import Element, SubElement, ElementTree
 from datetime import datetime
@@ -88,7 +89,7 @@ def generate_rss(entries):
         
         description = SubElement(item, "description")
         description.text = entry["content"]
-
+                                
     tree = ElementTree(rss)
     tree.write(os.path.join(OUTPUT_DIR, "media.xml"),
                encoding="utf-8",
@@ -111,14 +112,20 @@ def run_pipeline():
         entries = fetch_rss(source_name, url)
 
         for entry in entries:
-            title = entry["title"]
+            title = entry.get("title", "").strip()
+            title = re.sub(r"<.*?>", "", title)
 
             if not is_duplicate(title, existing_titles):
-                content = entry["summary"]
-
+                
+                content = entry.get("summary", "").strip()
+                
+                if not content:
+                    link = entry.get("link", "")
+                    content = f"<p>Full article: <a href='{link}'>{link}</a></p>"                    
+             
                 processed_entry = {
                     "source": entry["source"],
-                    "title": title,
+                    "title": f"[{entry['source']}] {title}",
                     "published": entry["published"],
                     "link": entry.get("link", ""),                    "content": content
                 }
