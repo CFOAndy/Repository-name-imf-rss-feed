@@ -2,34 +2,36 @@ name: Update Media Radar Feed
 
 on:
   schedule:
-    - cron: "*/30 * * * *"   # 每30分钟执行一次
+    - cron: "*/30 * * * *"
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Set up Python
+      - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install feedparser
 
-      - name: Run RSS generator
+      - name: Run aggregator
         run: python media_radar.py
 
-      - name: Commit and push if changed
+      - name: Commit updated RSS
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "actions@github.com"
-          git add rss/media.xml media_db.json
-          git commit -m "Auto update RSS" || echo "No changes"
+          git add rss/media.xml media_db.json || true
+          git commit -m "update media radar feed" || echo "no changes"
           git push
