@@ -2,10 +2,12 @@ import feedparser
 import os
 import json
 import re
+import hashlib
 from difflib import SequenceMatcher
 from xml.etree.ElementTree import Element, SubElement, ElementTree
 from datetime import datetime
 from email.utils import parsedate_to_datetime
+from newspaper import Article
 
 
 # ==============================
@@ -63,6 +65,7 @@ def clean_html(text):
 
 
 def classify_topic(title):
+
     title_lower = title.lower()
 
     for topic, keywords in TOPIC_KEYWORDS.items():
@@ -80,6 +83,34 @@ def parse_date(date_str):
         return datetime.utcnow()
 
 
+def generate_guid(link):
+    return hashlib.md5(link.encode()).hexdigest()
+
+
+# ==============================
+# 抓全文
+# ==============================
+
+def fetch_full_text(url):
+
+    try:
+
+        article = Article(url)
+
+        article.download()
+        article.parse()
+
+        text = article.text.strip()
+
+        if len(text) > 200:
+            return text
+
+    except:
+        pass
+
+    return ""
+
+
 # ==============================
 # RSS抓取
 # ==============================
@@ -90,14 +121,14 @@ def fetch_rss(source_name, url):
 
     try:
         feed = feedparser.parse(url)
-    except Exception as e:
+    except Exception:
         print(f"RSS error: {source_name}")
         return entries
 
     for entry in feed.entries[:MAX_ITEMS_PER_SOURCE]:
 
         title = clean_html(entry.get("title", ""))
-        summary = entry.get("summary", "")
+        summary = clean_html(entry.get("summary", ""))
         link = entry.get("link", "")
         published = entry.get("published", "")
 
@@ -153,7 +184,10 @@ def generate_rss(entries):
         SubElement(item, "pubDate").text = pub
 
         SubElement(item, "source").text = entry["source"]
+
         SubElement(item, "link").text = entry["link"]
+
+        SubElement(item, "guid").text = entry["guid"]
 
         description = SubElement(item, "description")
         description.text = entry["content"]
@@ -190,11 +224,16 @@ def run_pipeline():
 
             if not is_duplicate(title, existing_titles):
 
-                content = entry.get("summary", "").strip()
+                print("Extracting article...")
+
+                content = fetch_full_text(entry["link"])
+
+                if not content:
+                    content = entry.get("summary", "")
 
                 if not content:
                     link = entry.get("link", "")
-                    content = f"<p>Full article: <a href='{link}'>{link}</a></p>"
+                    content = f"Full article: {link}"
 
                 topic = classify_topic(title)
 
@@ -206,7 +245,9 @@ def run_pipeline():
 
                     "published": entry["published"],
 
-                    "link": entry.get("link", ""),
+                    "link": entry["link"],
+
+                    "guid": generate_guid(entry["link"]),
 
                     "content": content
 
@@ -215,7 +256,7 @@ def run_pipeline():
                 all_entries.append(processed_entry)
                 existing_titles.append(title)
 
-    # 排序（最新新闻优先）
+    # 按时间排序
 
     all_entries.sort(
         key=lambda x: parse_date(x["published"]),
