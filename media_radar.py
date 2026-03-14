@@ -3,6 +3,8 @@ import os
 import json
 import re
 import hashlib
+import requests
+from bs4 import BeautifulSoup
 from difflib import SequenceMatcher
 from xml.etree.ElementTree import Element, SubElement, ElementTree
 from datetime import datetime
@@ -35,7 +37,7 @@ TOPIC_KEYWORDS = {
     "Geopolitics": ["war", "iran", "china", "russia", "military", "sanction"],
     "Rates": ["interest rate", "fed", "ecb", "central bank", "inflation"],
     "China": ["china", "beijing", "xi", "renminbi"],
-    "AI": ["ai", "artificial intelligence", "deepseek", "openai"],
+   "AI": [" artificial intelligence", " openai", " deepseek"]
     "Markets": ["stocks", "equity", "bond", "market"],
 }
 
@@ -94,9 +96,7 @@ def generate_guid(link):
 def fetch_full_text(url):
 
     try:
-
         article = Article(url)
-
         article.download()
         article.parse()
 
@@ -108,8 +108,29 @@ def fetch_full_text(url):
     except:
         pass
 
-    return ""
+    # fallback parser
 
+    try:
+
+        headers = {
+            "User-Agent": "Mozilla/5.0"
+        }
+
+        r = requests.get(url, headers=headers, timeout=10)
+
+        soup = BeautifulSoup(r.text, "html.parser")
+
+        paragraphs = soup.find_all("p")
+
+        text = " ".join([p.get_text() for p in paragraphs])
+
+        if len(text) > 200:
+            return text
+
+    except:
+        pass
+
+    return ""
 
 # ==============================
 # RSS抓取
