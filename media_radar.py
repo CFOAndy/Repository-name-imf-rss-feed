@@ -23,8 +23,8 @@ RSS_FEEDS = {
     "BBC": "https://feeds.bbci.co.uk/news/world/rss.xml",
 }
 
-MAX_ITEMS_PER_SOURCE = 10
-SIMILARITY_THRESHOLD = 0.8
+MAX_ITEMS_PER_SOURCE = 5
+SIMILARITY_THRESHOLD = 0.92
 OUTPUT_DIR = "rss"
 DB_FILE = "media_db.json"
 
