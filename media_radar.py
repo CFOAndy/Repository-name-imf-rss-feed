@@ -19,7 +19,8 @@ from newspaper import Article
 RSS_FEEDS = {
     "Bloomberg": "https://feeds.bloomberg.com/markets/news.rss",
     "FT": "https://www.ft.com/rss/home",
-    "Caixin": "https://www.caixinglobal.com/rss/",
+    "CNN": "https://rss.cnn.com/rss/edition.rss",
+    "BBC": "https://feeds.bbci.co.uk/news/world/rss.xml",
 }
 
 MAX_ITEMS_PER_SOURCE = 10
