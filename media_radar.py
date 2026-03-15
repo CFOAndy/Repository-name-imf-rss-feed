@@ -19,26 +19,17 @@ from newspaper import Article
 RSS_FEEDS = {
 
     "Bloomberg": "https://feeds.bloomberg.com/markets/news.rss",
-
     "FT": "https://www.ft.com/rss/home",
-
-    "Reuters": "https://www.reuters.com/world/rss",
-
-    "CNN": "https://rss.cnn.com/rss/edition_world.rss",
-
+    "Reuters": "https://www.reutersagency.com/feed/?best-topics=business-finance&post_type=best",
+    "CNN": "https://rss.cnn.com/rss/money_latest.rss",
     "BBC": "https://feeds.bbci.co.uk/news/world/rss.xml",
-
     "Nikkei": "https://asia.nikkei.com/rss/feed/nar",
 
-    "Caixin": "https://www.caixinglobal.com/rss/",
 }
 
-MAX_ITEMS_PER_SOURCE = 5
-
-SIMILARITY_THRESHOLD = 0.92
-
+MAX_ITEMS_PER_SOURCE = 10
+SIMILARITY_THRESHOLD = 0.97
 OUTPUT_DIR = "rss"
-
 DB_FILE = "media_db.json"
 
 
@@ -49,18 +40,13 @@ DB_FILE = "media_db.json"
 TOPIC_KEYWORDS = {
 
     "Energy": ["oil", "gas", "energy", "opec", "crude", "lng"],
-
     "Geopolitics": ["war", "iran", "russia", "military", "sanction"],
-
     "Rates": ["interest rate", "fed", "ecb", "central bank", "inflation"],
-
     "China": ["china", "beijing", "xi", "renminbi", "yuan"],
-
-    "AI": [" artificial intelligence", " openai", " deepseek"],
-
+    "AI": ["ai", "artificial intelligence", "openai", "deepseek"],
     "Markets": ["stocks", "equity", "bond", "market", "trading"],
-
     "Companies": ["earnings", "company", "ceo", "merger", "acquisition"]
+
 }
 
 
@@ -137,9 +123,7 @@ def fetch_full_text(url):
     try:
 
         article = Article(url)
-
         article.download()
-
         article.parse()
 
         text = article.text.strip()
@@ -192,23 +176,16 @@ def fetch_rss(source_name, url):
     for entry in feed.entries[:MAX_ITEMS_PER_SOURCE]:
 
         title = clean_html(entry.get("title", ""))
-
         summary = clean_html(entry.get("summary", ""))
-
         link = entry.get("link", "")
-
         published = entry.get("published", "")
 
         entries.append({
 
             "source": source_name,
-
             "title": title,
-
             "link": link,
-
             "published": published,
-
             "summary": summary
 
         })
@@ -225,7 +202,6 @@ def save_to_db(entries):
     if os.path.exists(DB_FILE):
 
         with open(DB_FILE, "r", encoding="utf-8") as f:
-
             data = json.load(f)
 
     else:
@@ -246,13 +222,10 @@ def save_to_db(entries):
 def generate_rss(entries):
 
     rss = Element("rss", version="2.0")
-
     channel = SubElement(rss, "channel")
 
     SubElement(channel, "title").text = "Global Economic Media Radar"
-
     SubElement(channel, "link").text = "https://cfoandy.github.io/Repository-name-imf-rss-feed/"
-
     SubElement(channel, "description").text = "Global economic news feed"
 
     for entry in entries:
@@ -260,29 +233,20 @@ def generate_rss(entries):
         item = SubElement(channel, "item")
 
         SubElement(item, "title").text = entry["title"]
-
         SubElement(item, "pubDate").text = entry["published"]
-
         SubElement(item, "source").text = entry["source"]
-
         SubElement(item, "link").text = entry["link"]
-
         SubElement(item, "guid").text = entry["guid"]
 
-        desc = SubElement(item, "description")
-
-        desc.text = entry["content"]
+        description = SubElement(item, "description")
+        description.text = entry["content"]
 
     tree = ElementTree(rss)
 
     tree.write(
-
         os.path.join(OUTPUT_DIR, "media.xml"),
-
         encoding="utf-8",
-
         xml_declaration=True
-
     )
 
 
@@ -295,7 +259,6 @@ def run_pipeline():
     ensure_dirs()
 
     all_entries = []
-
     existing_titles = []
 
     for source_name, url in RSS_FEEDS.items():
@@ -320,29 +283,20 @@ def run_pipeline():
                 processed = {
 
                     "source": entry["source"],
-
                     "title": f"[{entry['source']}][{topic}] {title}",
-
                     "published": entry["published"],
-
                     "link": entry["link"],
-
                     "guid": generate_guid(entry["link"]),
-
                     "content": content
 
                 }
 
                 all_entries.append(processed)
-
                 existing_titles.append(title)
 
     all_entries.sort(
-
         key=lambda x: parse_date(x["published"]),
-
         reverse=True
-
     )
 
     save_to_db(all_entries)
@@ -352,6 +306,8 @@ def run_pipeline():
     print("media.xml generated successfully.")
 
 
+# ==============================
+# ENTRY
 # ==============================
 
 if __name__ == "__main__":
