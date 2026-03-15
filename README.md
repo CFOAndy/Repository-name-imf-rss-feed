@@ -1,4 +1,4 @@
-# Global Macro Media Radar
+# Global Economic Media Radar
 
 ![RSS Update](https://github.com/CFOAndy/Repository-name-imf-rss-feed/actions/workflows/imf.yml/badge.svg)
 
@@ -17,7 +17,22 @@ https://CFOAndy.github.io/Repository-name-imf-rss-feed/rss/media.xml
 You can subscribe using any RSS reader.
 
 ---
+## Sources
 
+- Bloomberg
+- Financial Times
+- Reuters
+- CNN
+- BBC
+- Nikkei
+---
+## Supported Readers
+
+- NetNewsWire
+- Feedly
+- Inoreader
+- Reeder
+---
 ## 🔄 Update Frequency
 
 The feed is automatically updated:
